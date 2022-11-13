@@ -1,0 +1,159 @@
+//Write a program to implement Huffman Encoding using a greedy strategy. 
+
+//This is C code, not Cpp
+
+
+#include <stdio.h> 
+#include <stdlib.h> 
+// node 
+/* 
+ _____ 
+ | data| 
+ | freq| 
+ |_____| 
+left ch./ \right chlid address 
+ _____/ \ _____ 
+| data| | data| 
+| freq| | freq| 
+|_____| |_____| 
+*/ 
+typedef struct node 
+{ 
+ int frequency; 
+ char data; 
+ struct node *left; 
+ struct node *right; 
+}node; 
+int heap_array_size = 100; // size of array storing heap 
+int heap_size = 0;
+const int INF = 100000; 
+//function to swap nodes 
+void swap( node *a, node *b ) { 
+ node t; 
+ t = *a; 
+ *a = *b; 
+ *b = t; 
+} 
+/* 
+ function to print tree 
+ https://www.codesdope.com/blog/article/binary-tree-in-c-linked-representation-traversals/ 
+*/ 
+void inorder(struct node *root) 
+{ 
+ if(root!=NULL) // checking if the root is not null 
+ { 
+ inorder(root->left); // visiting left child 
+ printf(" %d ", root->frequency); // printing data at root 
+ inorder(root->right);// visiting right child 
+ } 
+} 
+/* 
+ function for new node 
+*/ 
+node* new_node(char data, int freq) { 
+ node *p; 
+ p = malloc(sizeof(struct node)); 
+ p->data = data; 
+ p->frequency = freq; 
+ p->left = NULL; 
+ p->right = NULL; 
+ return p; 
+} 
+//function to get right child of a node of a tree 
+int get_right_child(int index) { 
+ if((((2*index)+1) <= heap_size) && (index >= 1)) 
+ return (2*index)+1; 
+ return -1; 
+} 
+//function to get left child of a node of a tree 
+int get_left_child(int index) { 
+ if(((2*index) <= heap_size) && (index >= 1)) 
+ return 2*index; 
+ return -1; 
+} 
+//function to get the parent of a node of a tree 
+int get_parent(int index) { 
+ if ((index > 1) && (index <= heap_size)) { 
+ return index/2; 
+ } 
+ return -1; 
+}
+ 
+/* Functions taken from minimum priority queue 
+ https://www.codesdope.com/blog/article/priority-queue-using-heap/  https://www.codesdope.com/blog/article/heap-binary-heap/*/ 
+ void insert(node A[], node* a, int key) { 
+ heap_size++; 
+ A[heap_size] = *a; 
+ int index = heap_size; 
+ while((index>1) && (A[get_parent(index)].frequency > a->frequency)) {  swap(&A[index], &A[get_parent(index)]); 
+ index = get_parent(index); 
+ } 
+} 
+node* build_queue(node c[], int size) { 
+ node* a = malloc(sizeof(node)*heap_array_size); // a is the array to store heap  
+ int i; 
+ for(i=0; i<size; i++) { 
+ insert(a, &c[i], c[i].frequency); // inserting node in array a(min-queue) 
+ } 
+ return a; 
+} 
+void min_heapify(node A[], int index) { 
+ int left_child_index = get_left_child(index); 
+ int right_child_index = get_right_child(index); 
+ // finding smallest among index, left child and right child 
+ int smallest = index; 
+ if ((left_child_index <= heap_size) && (left_child_index>0)) {  if (A[left_child_index].frequency < A[smallest].frequency) {  smallest = left_child_index; 
+ } 
+ } 
+ if ((right_child_index <= heap_size && (right_child_index>0))) {  if (A[right_child_index].frequency < A[smallest].frequency) {  smallest = right_child_index; 
+ } 
+ } 
+ // smallest is not the node, node is not a heap 
+ if (smallest != index) { 
+ swap(&A[index], &A[smallest]); 
+ min_heapify(A, smallest); 
+ } 
+} 
+node* extract_min(node A[]) { 
+ node minm = A[1]; 
+ A[1] = A[heap_size]; 
+ heap_size--; 
+ min_heapify(A, 1); 
+ node *z; 
+ // copying minimum element 
+ z = malloc(sizeof(struct node)); 
+ z->data = minm.data;
+z->frequency = minm.frequency; 
+ z->left = minm.left; 
+ z->right = minm.right; 
+ return z; //returning minimum element 
+} 
+// Huffman code 
+node* greedy_huffman_code(node C[]) { 
+ node *min_queue = build_queue(C, 6); // making min-queue 
+ while(heap_size > 1) { 
+ node *h = extract_min(min_queue); 
+ node *i = extract_min(min_queue); 
+ node *z; 
+ z = malloc(sizeof(node)); 
+ z->data = '\0'; 
+ z->left = h; 
+ z->right = i; 
+ z->frequency = z->left->frequency + z->right->frequency; 
+ insert(min_queue, z, z->frequency); 
+ } 
+ return extract_min(min_queue); 
+} 
+int main() { 
+ node *a = new_node('a', 42); 
+ node *b = new_node('b', 20); 
+ node *c = new_node('c', 5); 
+ node *d = new_node('d', 10); 
+ node *e = new_node('e', 11); 
+ node *f = new_node('f', 12); 
+ node C[] = {*a, *b, *c, *d, *e , *f}; 
+ node* z = greedy_huffman_code(C); 
+ inorder(z); //printing tree 
+ printf("\n"); 
+ return 0; 
+}
