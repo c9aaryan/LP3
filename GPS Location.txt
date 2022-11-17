@@ -1,0 +1,238 @@
+MainActivity.java:
+
+ packagetutorial.mycalculator.gsm_security;
+importandroid.Manifest;
+importandroid.annotation.SuppressLint;
+importandroid.content.Context;
+importandroid.content.pm.PackageManager;
+importandroid.location.Address;
+importandroid.location.Geocoder;
+importandroid.location.Location;
+importandroid.location.LocationListener;
+importandroid.location.LocationManager;
+importandroid.os.Bundle;
+importandroid.widget.TextView;
+importandroid.widget.Toast;
+importandroidx.annotation.NonNull;
+importandroidx.appcompat.app.AppCompatActivity;
+importandroidx.core.app.ActivityCompat;
+importandroidx.core.content.ContextCompat;
+importcom.example.preeti.hikerapp.R;
+importjava.util.List;
+importjava.util.Locale;
+@SuppressLint("Registered")
+public class MainActivity extends AppCompatActivity {
+
+LocationManagerlocationManager;
+LocationListenerlocationListener;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+locationListener = new LocationListener() {
+            @Override
+public void onLocationChanged(Location location) {
+                //Toast.makeText(MainActivity.this, location.toString(), Toast.LENGTH_LONG).show();
+updateLocationDetails(location);
+            }
+@Override
+public void onStatusChanged(String provider, int status, Bundle extras) { }
+
+            @Override
+public void onProviderEnabled(String provider) { }
+
+            @Override
+public void onProviderDisabled(String provider) { }
+        };
+
+if(ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+ActivityCompat.requestPermissions(this,new String[] {Manifest.permission.ACCESS_FINE_LOCATION},1);
+}else{
+            // locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,0,0,locationListener);
+locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,0,0,locationListener);
+
+            Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+
+if(lastKnownLocation != null){
+updateLocationDetails(lastKnownLocation);}}}
+
+    @Override
+public void onRequestPermissionsResult(intrequestCode, @NonNull String[] permissions, @NonNullint[] grantResults) {
+super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+if(grantResults.length> 0 &&grantResults[0] == PackageManager.PERMISSION_GRANTED){
+checkLocPermission();}}
+public void checkLocPermission(){
+if(ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,0,0,locationListener);}}
+public void updateLocationDetails(Location location){
+        //Toast.makeText(this, location.toString(), Toast.LENGTH_SHORT).show();
+TextViewlatitudeView = findViewById(R.id.latitudeView);
+TextViewlongitudeView=  findViewById(R.id.longitudeView);
+TextViewaccuracyView=  findViewById(R.id.accuracyView);
+TextViewaltitudeView = findViewById(R.id.altitudeView);
+TextViewaddressView = findViewById(R.id.addressView);
+
+latitudeView.setText("Latitude : "+Double.toString(location.getLatitude()));
+longitudeView.setText("Longitude : "+Double.toString(location.getLongitude()));
+accuracyView.setText("Accuracy : "+Double.toString(location.getAccuracy()));
+altitudeView.setText("Altitude : "+Double.toString(location.getAltitude()));
+
+        String address = "Could not locate address..";
+
+Geocodergeocoder = new Geocoder(this, Locale.getDefault());
+
+try {
+            List<Address>addressList = geocoder.getFromLocation(location.getLatitude(),location.getLongitude(),1);
+
+if(addressList != null &&addressList.size() > 0){
+address = "Address :\n";
+
+if(addressList.get(0).getThoroughfare() != null){
+address +=  addressList.get(0).getThoroughfare() +"\n";}
+
+if(addressList.get(0).getLocality() != null){
+address += addressList.get(0).getLocality() + "\n";}
+
+if(addressList.get(0).getPostalCode() != null){
+address += addressList.get(0).getPostalCode() + "\n";}
+
+if(addressList.get(0).getCountryName() != null){
+address += addressList.get(0).getCountryName();}}
+}catch (Exception e){
+e.printStackTrace();
+}addressView.setText(address);
+    }
+}
+
+
+AndroidManifest.xml:
+
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+package="com.example.preeti.hikerapp">
+
+<uses-permissionandroid:name="android.permission.ACCESS_FINE_LOCATION"/>
+<uses-permissionandroid:name="android.permission.ACCESS_COARSE_LOCATION"/>
+<uses-permissionandroid:name="android.permission.ACCESS_NETWORK_STATE"/>
+<uses-permissionandroid:name="android.permission.INTERNET"/>
+
+
+<application
+android:allowBackup="true"
+android:icon="@mipmap/ic_launcher"
+android:label="@string/app_name"
+android:roundIcon="@mipmap/ic_launcher_round"
+android:supportsRtl="true"
+android:theme="@style/Theme.AppCompat.NoActionBar">
+<activity android:name="tutorial.mycalculator.gsm_security.MainActivity">
+<intent-filter>
+<action android:name="android.intent.action.MAIN" />
+
+<category android:name="android.intent.category.LAUNCHER" />
+</intent-filter>
+</activity>
+</application>
+
+</manifest>
+
+
+
+
+Activity_main.xml:
+
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayoutxmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:background="@android:color/background_dark"
+tools:context="tutorial.mycalculator.gsm_security.MainActivity"
+tools:showIn="@layout/activity_main">
+<!--<ImageView-->
+<!--android:id="@+id/imageView4"-->
+<!--android:layout_width="wrap_content"-->
+<!--android:layout_height="wrap_content"-->
+<!--android:scaleType="centerCrop"-->
+<!--app:layout_constraintBottom_toBottomOf="parent"-->
+<!--app:layout_constraintEnd_toEndOf="parent"-->
+<!--app:layout_constraintHorizontal_bias="1.0"-->
+<!--app:layout_constraintStart_toStartOf="parent"-->
+<!--app:layout_constraintTop_toTopOf="parent"-->
+<!--app:layout_constraintVertical_bias="0.0"-->
+<!--app:srcCompat="@drawable/mountain" />-->
+<TextView
+android:id="@+id/textView3"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_marginStart="8dp"
+android:layout_marginEnd="8dp"
+android:text="HIKER APP"
+android:textColor="@android:color/background_light"
+android:textSize="40sp"
+app:layout_constraintEnd_toEndOf="parent"
+app:layout_constraintStart_toStartOf="parent"
+tools:layout_editor_absoluteY="2dp"
+tools:ignore="MissingConstraints" />
+<!--app:layout_constraintEnd_toStartOf="@+id/imageView4"-->
+<!--app:layout_constraintHorizontal_bias="0.5"-->
+<!--app:layout_constraintStart_toEndOf="@+id/imageView4"-->
+<!--app:layout_constraintTop_toTopOf="@+id/imageView4" />-->
+<TextView
+android:id="@+id/latitudeView"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_marginStart="30dp"
+android:layout_marginTop="25dp"
+android:text="Latitude"
+android:textColor="@android:color/background_light"
+android:textSize="24sp"
+app:layout_constraintStart_toStartOf="parent"
+app:layout_constraintTop_toBottomOf="@+id/textView3" />
+<TextView
+android:id="@+id/longitudeView"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_marginStart="30dp"
+android:layout_marginTop="25dp"
+android:text="Longitude"
+android:textColor="@android:color/background_light"
+android:textSize="24sp"
+app:layout_constraintStart_toStartOf="parent"
+app:layout_constraintTop_toBottomOf="@+id/latitudeView" />
+<TextView
+android:id="@+id/accuracyView"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_marginStart="28dp"
+android:layout_marginTop="25dp"
+android:text="Accuracy"
+android:textColor="@android:color/background_light"
+android:textSize="24sp"
+app:layout_constraintStart_toStartOf="parent"
+app:layout_constraintTop_toBottomOf="@+id/longitudeView" />
+<TextView
+android:id="@+id/altitudeView"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_marginStart="28dp"
+android:layout_marginTop="25dp"
+android:text="Altitude"
+android:textColor="@android:color/background_light"
+android:textSize="24sp"
+app:layout_constraintStart_toStartOf="parent"
+app:layout_constraintTop_toBottomOf="@+id/accuracyView" />
+<TextView
+android:id="@+id/addressView"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_marginStart="28dp"
+android:layout_marginTop="20dp"
+android:text="Address\nSector 13, Nerul\nNavii Mumbai"
+android:textColor="@android:color/background_light"
+android:textSize="24sp"
+app:layout_constraintStart_toStartOf="parent"
+app:layout_constraintTop_toBottomOf="@+id/altitudeView" />
+</androidx.constraintlayout.widget.ConstraintLayout/>
