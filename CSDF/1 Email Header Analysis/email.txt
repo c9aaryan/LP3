@@ -1,0 +1,7 @@
+from:	Google <no-reply@accounts.google.com>
+to:	yadavnikhil1771@gmail.com
+date:	Nov 4, 2022, 12:30 AM
+subject:	Here’s your link to sign in to your Google Account
+mailed-by:	gaia.bounces.google.com
+signed-by:	accounts.google.com
+security:	 Standard encryption (TLS)
